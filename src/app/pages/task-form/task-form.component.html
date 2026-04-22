@@ -136,10 +136,13 @@
       </div>
 
       <div class="d-flex justify-content-end gap-2 border-top pt-3">
-        <button type="button" class="btn btn-outline-secondary px-4" (click)="taskForm.reset()">Limpar Tudo</button>
-        <button type="submit" class="btn btn-primary px-5 fw-bold" [disabled]="taskForm.invalid">
-          Adicionar Registro
-        </button>
+        @if (taskService.editingIndex() !== null) {
+          <button type="button" class="btn btn-warning" (click)="cancelarEdicao()">Cancelar Edição</button>
+          <button type="submit" class="btn btn-success px-5 fw-bold">Atualizar Registro</button>
+        } @else {
+          <button type="button" class="btn btn-outline-secondary px-4" (click)="taskForm.reset()">Limpar Tudo</button>
+          <button type="submit" class="btn btn-primary px-5 fw-bold" [disabled]="taskForm.invalid">Adicionar Registro</button>
+        }
       </div>
     </form>
   </div>

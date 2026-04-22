@@ -18,7 +18,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a routerLink="/novo" routerLinkActive="active" class="nav-link py-3 shadow-sm border">
+          <a routerLink="/tarefa" routerLinkActive="active" class="nav-link py-3 shadow-sm border">
             <i class="bi bi-plus-circle me-2"></i> Lançar Tarefa
           </a>
         </li>
