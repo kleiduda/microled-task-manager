@@ -1,0 +1,69 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-0">Minhas Tarefas</h2>
+    <p class="text-muted">Você tem {{ tasks.length }} tarefa(s) pronta(s) para o Excel.</p>
+  </div>
+  
+  <button class="btn btn-success btn-lg shadow-sm" (click)="gerarExcel()" [disabled]="tasks.length === 0">
+    <i class="bi bi-file-earmark-excel me-2"></i> Gerar Tabela Excel
+  </button>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-3">Dia</th>
+            <th>Projeto</th>
+            <th>OS</th>
+            <th>Horas</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Atendimento</th>
+            <th class="text-center">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (task of tasks; track $index) {
+            <tr>
+              <td class="ps-3 fw-bold">{{ task.dia }}</td>
+              <td><span class="badge bg-info text-dark">{{ task.projeto }}</span></td>
+              <td>{{ task.os }}</td>
+              <td>{{ task.horas }}h</td>
+              <td class="text-truncate" style="max-width: 250px;">{{ task.descricao }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-success': task.status === 'Finalizado',
+                  'bg-warning text-dark': task.status === 'Em andamento'
+                }">{{ task.status }}</span>
+              </td>
+              <td>{{ task.tipoAtendimento }}</td>
+              <td class="text-center">
+                <button class="btn btn-outline-danger btn-sm" (click)="remover($index)">
+                   Excluir
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="text-center py-5">
+                <div class="text-muted">
+                  <p class="mb-0">Nenhuma tarefa lançada ainda.</p>
+                  <a routerLink="/novo" class="btn btn-link">Clique aqui para começar</a>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+@if (tasks.length > 0) {
+  <div class="mt-3 text-end text-muted">
+    <small>Os dados serão exportados exatamente no formato das colunas A até Q do seu Excel original.</small>
+  </div>
+}

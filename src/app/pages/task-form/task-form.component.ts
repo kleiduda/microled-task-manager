@@ -1,0 +1,102 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TaskService } from '../../services/task.service';
+import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
+import { ProjectService } from '../../services/project.service';
+import Swal from 'sweetalert2';
+
+@Component({
+  selector: 'app-task-form',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, NgxMaskDirective, NgxMaskPipe],
+  templateUrl: './task-form.component.html'
+})
+export class TaskFormComponent {
+  private fb = inject(FormBuilder);
+  private taskService = inject(TaskService);
+  projectService = inject(ProjectService);
+
+  taskForm: FormGroup = this.fb.group({
+    dia: [new Date().toISOString().substring(0, 10), Validators.required],
+    horaInicio: ['', Validators.required],
+    horaFim: ['', Validators.required],
+    horas: [0, Validators.required],
+    descricao: [''],
+    custeio: ['2'],
+    status: ['Em andamento'],
+    os: [{ value: '', disabled: true }],
+    projeto: ['', Validators.required],
+    cliente: [{ value: '', disabled: true }],
+    despesasAutorizadas: [''],
+    alimentacao: [''],
+    viagem: [''],
+    inLoco: ['N'],
+    tipoAtendimento: ['D'],
+    executavelAlterado: [''],
+    versao: [''],
+    solicitante: ['']
+  });
+
+  atualizarCalculo() {
+    const inicio = this.taskForm.get('horaInicio')?.value;
+    const fim = this.taskForm.get('horaFim')?.value;
+
+    if (inicio?.length === 4 && fim?.length === 4) {
+      const h1 = parseInt(inicio.substring(0, 2));
+      const m1 = parseInt(inicio.substring(2, 4));
+      const h2 = parseInt(fim.substring(0, 2));
+      const m2 = parseInt(fim.substring(2, 4));
+
+      const iniMin = h1 * 60 + m1;
+      const fimMin = h2 * 60 + m2;
+
+      if (fimMin > iniMin) {
+        let diff = fimMin - iniMin;
+
+        if (iniMin <= 720 && fimMin >= 780) {
+          diff -= 60;
+        }
+
+        const resultado = diff / 60;
+        
+        this.taskForm.get('horas')?.setValue(resultado);
+      }
+    }
+  }
+
+  onSubmit() {
+    if (this.taskForm.valid) {
+      const raw = this.taskForm.getRawValue();
+      
+      const fIn = raw.horaInicio;
+      const fFi = raw.horaFim;
+      const periodoExcel = `${fIn.substring(0,2)}:${fIn.substring(2,4)} - ${fFi.substring(0,2)}:${fFi.substring(2,4)}`;
+
+      const novaTarefa = { 
+        ...raw,
+        periodo: periodoExcel,
+        dia: raw.dia.split('-').reverse().slice(0,2).join('/')
+      };
+      
+      this.taskService.addTask(novaTarefa);
+      Swal.fire({ icon: 'success', title: 'Adicionado!', timer: 800, showConfirmButton: false });
+
+      this.taskForm.patchValue({ horaInicio: '', horaFim: '', horas: 0, descricao: '' });
+    }
+  }
+
+  onProjectSelect(event: any) {
+    const nomeProjeto = event.target.value;
+    const projetoEncontrado = this.projectService.projects().find(p => p.nome === nomeProjeto);
+
+    if (projetoEncontrado) {
+      this.taskForm.patchValue({
+        os: projetoEncontrado.os,
+        cliente: projetoEncontrado.cliente
+      });
+    } else {
+      this.taskForm.patchValue({ os: '', cliente: '' });
+    }
+  }
+}

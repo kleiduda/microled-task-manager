@@ -1,0 +1,146 @@
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-dark text-white py-3">
+    <h5 class="mb-0">Novo Registro</h5>
+  </div>
+  <div class="card-body bg-light">
+    <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Bloco 1: Tempo e Descrição -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Dia</label>
+          <input type="date" class="form-control" formControlName="dia">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Início</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            mask="00:00"
+            placeholder="08:00"
+            formControlName="horaInicio"
+            (keyup)="atualizarCalculo()"
+          >
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Fim</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            mask="00:00" 
+            placeholder="17:00"
+            formControlName="horaFim"
+            (keyup)="atualizarCalculo()"
+          >
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Horas</label>
+          <input 
+            type="number" 
+            step="0.1"
+            class="form-control" 
+            formControlName="horas"
+          >
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Descrição</label>
+          <input type="text" class="form-control" formControlName="descricao">
+        </div>
+      </div>
+
+      <!-- Bloco 2: Status e Projeto -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Custeio</label>
+          <select class="form-select" formControlName="custeio">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Status</label>
+          <select class="form-select" formControlName="status">
+            <option value="Em andamento">Em andamento</option>
+            <option value="Finalizado">Finalizado</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Projeto</label>
+          <select class="form-select" formControlName="projeto" (change)="onProjectSelect($event)">
+            <option value="">Selecione um projeto...</option>
+            @for (p of projectService.projects(); track p.nome) {
+              <option [value]="p.nome">{{ p.nome }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold text-muted">OS</label>
+          <input type="text" class="form-control bg-light" formControlName="os" readonly>
+        </div>
+      </div>
+
+      <!-- Bloco 3: Financeiro e Local -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-2">
+          <label class="form-label fw-bold text-muted">Cliente</label>
+          <input type="text" class="form-control bg-light" formControlName="cliente" readonly>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Despesas Autorizadas</label>
+          <input type="text" class="form-control" formControlName="despesasAutorizadas">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Alimentação</label>
+          <input type="text" class="form-control" formControlName="alimentacao">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Viagem</label>
+          <input type="text" class="form-control" formControlName="viagem">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">In Loco (S/N)</label>
+          <select class="form-select" formControlName="inLoco">
+            <option value="N">Não (N)</option>
+            <option value="S">Sim (S)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bloco 4: Técnico -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Tipo Atendimento</label>
+          <select class="form-select" formControlName="tipoAtendimento">
+            <option value="">(Vazio)</option>
+            <option value="D">Desenvolvimento</option>
+            <option value="S">Suporte</option>
+            <option value="L">Levantamento</option>
+            <option value="M">Manutenção</option>
+            <option value="I">Implantação</option>
+            <option value="E">Erro run-time</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Executável Alterado</label>
+          <input type="text" class="form-control" formControlName="executavelAlterado">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Versão (ddmmyyyy)</label>
+          <input type="text" class="form-control" formControlName="versao">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold">Solicitante</label>
+          <input type="text" class="form-control" formControlName="solicitante">
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 border-top pt-3">
+        <button type="button" class="btn btn-outline-secondary px-4" (click)="taskForm.reset()">Limpar Tudo</button>
+        <button type="submit" class="btn btn-primary px-5 fw-bold" [disabled]="taskForm.invalid">
+          Adicionar Registro
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
