@@ -3,10 +3,28 @@
     <h2 class="fw-bold mb-0">Minhas Tarefas</h2>
     <p class="text-muted">Você tem {{ tasks.length }} tarefa(s) pronta(s) para o Excel.</p>
   </div>
-  
-  <button class="btn btn-success btn-lg shadow-sm" (click)="gerarExcel()" [disabled]="tasks.length === 0">
-    <i class="bi bi-file-earmark-excel me-2"></i> Gerar Tabela Excel
-  </button>
+</div>
+<div class="card shadow-sm mb-4 border-0">
+  <div class="card-body bg-dark text-white rounded shadow">
+    <div class="row align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small fw-bold">Data Início</label>
+        <input type="date" class="form-control" [(ngModel)]="dataInicio">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-bold">Data Fim</label>
+        <input type="date" class="form-control" [(ngModel)]="dataFim">
+      </div>
+      <div class="col-md-6 d-flex gap-2">
+        <button class="btn btn-outline-light w-50" (click)="dataInicio = ''; dataFim = ''">
+          Limpar Filtro
+        </button>
+        <button class="btn btn-success w-100 fw-bold" (click)="gerarExcel()" [disabled]="tasksFiltradas.length === 0">
+          <i class="bi bi-file-earmark-excel me-2"></i> Gerar Excel do Período
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="card shadow-sm">
@@ -26,11 +44,11 @@
           </tr>
         </thead>
         <tbody>
-          @for (task of tasks; track $index) {
+          @for (task of tasksFiltradas; track task) {
             <tr>
-              <td class="ps-3 fw-bold">{{ task.dia }}</td>
-              <td><span class="badge bg-info text-dark">{{ task.projeto }}</span></td>
-              <td>{{ task.os }}</td>
+              <td class="fw-bold">{{ task.dia | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ task.projeto }}</td>
+              <td>{{ task.descricao }}</td>
               <td>{{ task.horas }}h</td>
               <td class="text-truncate" style="max-width: 250px;">{{ task.descricao }}</td>
               <td>
@@ -41,9 +59,14 @@
               </td>
               <td>{{ task.tipoAtendimento }}</td>
               <td class="text-center">
-                <button class="btn btn-outline-danger btn-sm" (click)="remover($index)">
-                   Excluir
-                </button>
+                <div class="btn-group">
+                  <button class="btn btn-outline-primary btn-sm" (click)="editar($index)">
+                    Editar
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" (click)="remover($index)">
+                    Excluir
+                  </button>
+                </div>
               </td>
             </tr>
           } @empty {
@@ -51,7 +74,7 @@
               <td colspan="8" class="text-center py-5">
                 <div class="text-muted">
                   <p class="mb-0">Nenhuma tarefa lançada ainda.</p>
-                  <a routerLink="/novo" class="btn btn-link">Clique aqui para começar</a>
+                  <a routerLink="/tarefa" class="btn btn-link">Clique aqui para começar</a>
                 </div>
               </td>
             </tr>

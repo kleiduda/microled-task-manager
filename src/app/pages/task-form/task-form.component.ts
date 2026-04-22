@@ -1,21 +1,43 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TaskService } from '../../services/task.service';
 import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
 import { ProjectService } from '../../services/project.service';
+import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgxMaskDirective, NgxMaskPipe],
+  imports: [CommonModule, ReactiveFormsModule, NgxMaskDirective],
   templateUrl: './task-form.component.html'
 })
-export class TaskFormComponent {
+export class TaskFormComponent implements OnInit {
   private fb = inject(FormBuilder);
-  private taskService = inject(TaskService);
+  taskService = inject(TaskService);
+  private router = inject(Router);
   projectService = inject(ProjectService);
+
+  ngOnInit() {
+    const index = this.taskService.editingIndex();
+    
+    if (index !== null) {
+      const tarefaParaEditar = this.taskService.tasks()[index];
+      const partes = tarefaParaEditar.periodo.split(' - '); 
+      const hIni = partes[0] ? partes[0].replace(':', '') : '';
+      const hFim = partes[1] ? partes[1].replace(':', '') : '';
+
+      this.taskForm.patchValue({
+        ...tarefaParaEditar,
+        horaInicio: hIni,
+        horaFim: hFim
+      });
+
+      this.taskForm.get('os')?.setValue(tarefaParaEditar.os);
+      this.taskForm.get('cliente')?.setValue(tarefaParaEditar.cliente);
+    }
+  }
 
   taskForm: FormGroup = this.fb.group({
     dia: [new Date().toISOString().substring(0, 10), Validators.required],
@@ -68,22 +90,33 @@ export class TaskFormComponent {
   onSubmit() {
     if (this.taskForm.valid) {
       const raw = this.taskForm.getRawValue();
-      
       const fIn = raw.horaInicio;
       const fFi = raw.horaFim;
       const periodoExcel = `${fIn.substring(0,2)}:${fIn.substring(2,4)} - ${fFi.substring(0,2)}:${fFi.substring(2,4)}`;
 
-      const novaTarefa = { 
+      const tarefaProcessada = { 
         ...raw,
         periodo: periodoExcel,
-        dia: raw.dia.split('-').reverse().slice(0,2).join('/')
+        dia: raw.dia
       };
-      
-      this.taskService.addTask(novaTarefa);
-      Swal.fire({ icon: 'success', title: 'Adicionado!', timer: 800, showConfirmButton: false });
 
-      this.taskForm.patchValue({ horaInicio: '', horaFim: '', horas: 0, descricao: '' });
+      const index = this.taskService.editingIndex();
+      
+      if (index !== null) {
+        this.taskService.updateTask(index, tarefaProcessada);
+        Swal.fire('Atualizado!', 'Tarefa editada com sucesso.', 'success');
+      } else {
+        this.taskService.addTask(tarefaProcessada);
+        Swal.fire('Salvo!', 'Nova tarefa adicionada.', 'success');
+      }
+
+      this.router.navigate(['/listagem']);
     }
+  }
+
+  cancelarEdicao() {
+    this.taskService.editingIndex.set(null);
+    this.router.navigate(['/listagem']);
   }
 
   onProjectSelect(event: any) {
