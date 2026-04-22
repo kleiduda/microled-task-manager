@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TaskService } from '../../services/task.service';
@@ -13,29 +13,40 @@ import Swal from 'sweetalert2';
   imports: [CommonModule, ReactiveFormsModule, NgxMaskDirective],
   templateUrl: './task-form.component.html'
 })
+
 export class TaskFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   taskService = inject(TaskService);
   private router = inject(Router);
   projectService = inject(ProjectService);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
-    const index = this.taskService.editingIndex();
+    const indexParaEditar = this.taskService.editingIndex();
     
-    if (index !== null) {
-      const tarefaParaEditar = this.taskService.tasks()[index];
-      const partes = tarefaParaEditar.periodo.split(' - '); 
-      const hIni = partes[0] ? partes[0].replace(':', '') : '';
-      const hFim = partes[1] ? partes[1].replace(':', '') : '';
+    if (indexParaEditar !== null) {
+      const lista = this.taskService.tasks();
+      const tarefa = lista[indexParaEditar];
 
-      this.taskForm.patchValue({
-        ...tarefaParaEditar,
-        horaInicio: hIni,
-        horaFim: hFim
-      });
+      if (tarefa) {
+        console.log('Editando tarefa:', tarefa);
+        const partes = tarefa.periodo.split(' - ');
+        const hIni = partes[0] ? partes[0].replace(/:/g, '') : '';
+        const hFim = partes[1] ? partes[1].replace(/:/g, '') : '';
 
-      this.taskForm.get('os')?.setValue(tarefaParaEditar.os);
-      this.taskForm.get('cliente')?.setValue(tarefaParaEditar.cliente);
+        setTimeout(() => {
+          this.taskForm.patchValue({
+            ...tarefa,
+            horaInicio: hIni,
+            horaFim: hFim
+          });
+
+          this.taskForm.get('os')?.setValue(tarefa.os);
+          this.taskForm.get('cliente')?.setValue(tarefa.cliente);
+          
+          this.cdr.detectChanges();
+        }, 0);
+      }
     }
   }
 

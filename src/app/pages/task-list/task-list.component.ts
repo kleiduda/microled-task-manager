@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './task-list.component.html'
 })
+
 export class TaskListComponent {
   public taskService = inject(TaskService);
   private router = inject(Router);
